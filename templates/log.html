@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Log</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Daily Log</h2>
+        <form method="POST">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+            <label for="energy">Energy Level (1-5):</label>
+            <input type="number" id="energy" name="energy" min="1" max="5" required>
+            <label for="mood">Mood (1-5):</label>
+            <input type="number" id="mood" name="mood" min="1" max="5" required>
+            <label for="focus">Focus (1-5):</label>
+            <input type="number" id="focus" name="focus" min="1" max="5" required>
+            <label for="notes">Notes:</label>
+            <textarea id="notes" name="notes" rows="2" style="width:100%;margin-bottom:12px;"></textarea>
+            <button type="submit" class="btn">Save Log</button>
+        </form>
+
+        {% if recommendation %}
+        <div class="results">
+            <h3>Focus Hour Recommendation</h3>
+            <p>{{ recommendation }}</p>
+        </div>
+        {% endif %}
+
+        <hr>
+        <h3>Analytics (Last 5 Logs)</h3>
+        <div style="margin-bottom:16px;">
+            <strong>Average Energy:</strong> {{ avg_energy if avg_energy is not none else 'N/A' }}<br>
+            <strong>Average Mood:</strong> {{ avg_mood if avg_mood is not none else 'N/A' }}<br>
+            <strong>Average Focus:</strong> {{ avg_focus if avg_focus is not none else 'N/A' }}
+        </div>
+        <a href="/" class="btn" style="margin-top:20px;">Back</a>
+        <a href="/export_logs" class="btn" style="margin-bottom:18px;">Download CSV</a>
+        <h3>Recent Logs</h3>
+        <table style="width:100%;margin-top:12px;border-collapse:collapse;">
+            <tr style="background:#f7f6fa;">
+                <th>Date</th>
+                <th>Energy</th>
+                <th>Mood</th>
+                <th>Focus</th>
+                <th>Notes</th>
+            </tr>
+            {% for log in recent_logs %}
+            <tr>
+                <td>{{ log['date'] }}</td>
+                <td>{{ log['energy'] }}</td>
+                <td>{{ log['mood'] }}</td>
+                <td>{{ log['focus'] }}</td>
+                <td>{{ log['notes'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3 style="margin-top:32px;">Trends (Last 5 Logs)</h3>
+        <canvas id="trendChart" width="400" height="200"></canvas>
+    <script>
+    const logDates = JSON.parse('{{ recent_logs|map(attribute="date")|list|tojson | safe }}');
+    const energyData = JSON.parse('{{ recent_logs|map(attribute="energy")|list|tojson | safe }}');
+    const moodData = JSON.parse('{{ recent_logs|map(attribute="mood")|list|tojson | safe }}');
+    const focusData = JSON.parse('{{ recent_logs|map(attribute="focus")|list|tojson | safe }}');
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: logDates,
+                datasets: [
+                    {
+                        label: 'Energy',
+                        data: energyData,
+                        borderColor: '#d16ba5',
+                        backgroundColor: 'rgba(209,107,165,0.15)',
+                        pointBackgroundColor: '#d16ba5',
+                        pointRadius: 5,
+                        fill: false,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Mood',
+                        data: moodData,
+                        borderColor: '#3a3a8a',
+                        backgroundColor: 'rgba(58,58,138,0.15)',
+                        pointBackgroundColor: '#3a3a8a',
+                        pointRadius: 5,
+                        fill: false,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Focus',
+                        data: focusData,
+                        borderColor: '#009688',
+                        backgroundColor: 'rgba(0,150,136,0.15)',
+                        pointBackgroundColor: '#009688',
+                        pointRadius: 5,
+                        fill: false,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 14 },
+                            color: '#333'
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 1,
+                        max: 5,
+                        title: {
+                            display: true,
+                            text: 'Level (1-5)'
+                        },
+                        grid: {
+                            color: '#eee'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: '#eee'
+                        }
+                    }
+                }
+            }
+        });
+        </script>
+    </div>
+</body>
+</html>

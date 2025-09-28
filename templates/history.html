@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Period History</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Period History</h2>
+        <a href="/export_periods" class="btn" style="margin-bottom:18px;">Download CSV</a>
+        <h3>Last 5 Periods</h3>
+        <table style="width:100%;margin-top:12px;border-collapse:collapse;">
+            <tr style="background:#f7f6fa;">
+                <th>Start Date</th>
+                <th>Cycle Length (days)</th>
+            </tr>
+            {% for period in recent_periods %}
+            <tr>
+                <td>{{ period['start_date'] }}</td>
+                <td>{{ period['cycle_length'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <h3 style="margin-top:32px;">Cycle Length Trend</h3>
+        <canvas id="cycleChart" width="400" height="200"></canvas>
+        <script>
+        const periodDates = {{ recent_periods|map(attribute='start_date')|list|tojson | safe }};
+        const cycleLengths = {{ recent_periods|map(attribute='cycle_length')|list|tojson | safe }};
+        const ctx = document.getElementById('cycleChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: periodDates,
+                datasets: [{
+                    label: 'Cycle Length (days)',
+                    data: cycleLengths,
+                    borderColor: '#86a8e7',
+                    backgroundColor: 'rgba(134,168,231,0.15)',
+                    pointBackgroundColor: '#86a8e7',
+                    pointRadius: 5,
+                    fill: false,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: { enabled: true, mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: {
+                        min: 20,
+                        max: 40,
+                        title: { display: true, text: 'Cycle Length (days)' },
+                        grid: { color: '#eee' }
+                    },
+                    x: { grid: { color: '#eee' } }
+                }
+            }
+        });
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Cycle</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Track Your Cycle</h2>
+        <form method="POST">
+            <label for="start_date">Last Period Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required>
+            <label for="cycle_length">Average Cycle Length (days):</label>
+            <input type="number" id="cycle_length" name="cycle_length" min="20" max="40" required>
+            <button type="submit" class="btn">Save</button>
+        </form>
+
+        {% if phase %}
+        <div class="results">
+            <h3>Current Phase: {{ phase }}</h3>
+            <p>{{ phase_info }}</p>
+            <h4>Fitness Recommendation</h4>
+            <p>{{ fitness }}</p>
+            <h4>Nutrition Recommendation</h4>
+            <p>{{ nutrition }}</p>
+        </div>
+        {% endif %}
+        {% if period_prediction %}
+        <div class="results">
+            <h4>Period Prediction</h4>
+            <p>{{ period_prediction }}</p>
+        </div>
+        {% endif %}
+
+        <hr>
+        <h3>Last 5 Periods</h3>
+    <table style="width:100%;margin-top:12px;border-collapse:collapse;">
+    </table>
+    <a href="/" class="btn" style="margin-top:20px;">Back</a>
+            <tr style="background:#f7f6fa;">
+                <th>Start Date</th>
+                <th>Cycle Length (days)</th>
+            </tr>
+            {% for period in recent_periods %}
+            <tr>
+                <td>{{ period['start_date'] }}</td>
+                <td>{{ period['cycle_length'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
